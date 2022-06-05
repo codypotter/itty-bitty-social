@@ -14,24 +14,37 @@ type httpApi struct {
 
 func New(appLayer applayer.App) *httpApi {
 	a := &httpApi{
-		engine: gin.Default(),
+		engine: gin.New(),
 		app:    appLayer,
 	}
 	a.SetupRoutes()
 	return a
 }
 
-func (a *httpApi) SetupRoutes() {
-	api := a.engine.Group("/api")
+func (self *httpApi) SetupRoutes() {
+	self.engine.Use(gin.Recovery())
+	api := self.engine.Group("/api")
 	{
-		api.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "pong",
-			})
-		})
+		api.GET("/ping", pong)
+		users := api.Group("/users")
+		{
+			users.GET("", self.getAllUsers)
+			users.POST("", self.createUser)
+		}
+		posts := api.Group("/posts")
+		{
+			posts.GET("", self.getAllPosts)
+			posts.POST("", self.createPost)
+		}
 	}
 }
 
-func (a *httpApi) Engage() {
-	a.engine.Run()
+func (self *httpApi) Engage() {
+	self.engine.Run()
+}
+
+func pong(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
 }

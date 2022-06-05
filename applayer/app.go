@@ -1,15 +1,24 @@
 package applayer
 
-import store "github.com/codypotter/itty-bitty-social/storelayer"
+import (
+	"context"
 
-type App interface{}
+	"github.com/codypotter/itty-bitty-social/storelayer"
+)
 
-type app struct {
-	storeLayer store.Layer
+type App interface {
+	GetAllUsers(ctx context.Context) ([]storelayer.User, error)
+	CreateUser(ctx context.Context, name, handle string) error
+	CreatePost(ctx context.Context, content, owner string) error
+	GetAllPosts(ctx context.Context) ([]Post, error)
 }
 
-func New(sl store.Layer) *app {
+type app struct {
+	store storelayer.Store
+}
+
+func New(store storelayer.Store) *app {
 	return &app{
-		storeLayer: sl,
+		store: store,
 	}
 }
